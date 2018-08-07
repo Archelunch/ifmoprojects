@@ -2,6 +2,7 @@
 import sys
 
 sys.path.append('../../')
+sys.path.append('/media/stc_ml_school/team1')
 from pytorch.common.datasets_parsers.av_parser import AVDBParser
 from pytorch.common.net_trainer import NetTrainer
 from pytorch.common.losses import *
@@ -33,10 +34,11 @@ def get_net_params(net, lr, weight_decay):
         if not value.requires_grad:
             continue
         if 'bias' in name:
-            params += [{'name':name, 'params':value, 'lr': lr, 'weight_decay': 0}]
+            params += [{'name': name, 'params': value, 'lr': lr, 'weight_decay': 0}]
         else:
-            params += [{'name':name, 'params':value, 'lr': lr, 'weight_decay': weight_decay}]
+            params += [{'name': name, 'params': value, 'lr': lr, 'weight_decay': weight_decay}]
     return params
+
 
 def train():
     arguments_parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -57,7 +59,7 @@ def train():
         ini_net = cfg['ini_net'][host]
 
     # init logging
-    experiment_name =  params['train']['experiment_name'] + str(params['train']['cuda_device'])
+    experiment_name = params['train']['experiment_name'] + str(params['train']['cuda_device'])
     create_logger(log['log_dir'],
                   experiment_name + '.log',
                   console_level=logging.CRITICAL,
@@ -79,16 +81,17 @@ def train():
                                       file_list=dataset['train']['file_list'],
                                       max_num_clips=params['parser']['max_num_clips'],
                                       max_num_samples=params['parser']['max_num_samples'],
-                                      ungroup=params['preproc']['data_frame']['depth']==1,
+                                      ungroup=params['preproc']['data_frame']['depth'] == 1,
                                       normalize='AFEW-VA' in dataset['train']['data_root'])
     valid_dataset_parser = AVDBParser(dataset_root=dataset['valid']['data_root'],
                                       file_list=dataset['valid']['file_list'],
                                       max_num_clips=params['parser']['max_num_clips'],
                                       max_num_samples=params['parser']['max_num_samples'],
-                                      ungroup=params['preproc']['data_frame']['depth']==1,
+                                      ungroup=params['preproc']['data_frame']['depth'] == 1,
                                       normalize='AFEW-VA' in dataset['train']['data_root'])
 
-    softmax_size = params['net']['softmax_size'] if params['net']['softmax_size'] > 0 else train_dataset_parser.get_class_num()
+    softmax_size = params['net']['softmax_size'] if params['net'][
+                                                        'softmax_size'] > 0 else train_dataset_parser.get_class_num()
     print('\rsoftmax_size = %d' % softmax_size)
 
     # create train data sampler
@@ -125,8 +128,10 @@ def train():
                                                 use_mirroring=False,
                                                 use_random_crop=False,
                                                 use_center_crop=params['preproc']['aug']['pad'] > 0 \
-                                                                or params['preproc']['crop_size'] != params['preproc']['data_frame']['width'] \
-                                                                or params['preproc']['crop_size'] != params['preproc']['data_frame']['height'])
+                                                                or params['preproc']['crop_size'] !=
+                                                                params['preproc']['data_frame']['width'] \
+                                                                or params['preproc']['crop_size'] !=
+                                                                params['preproc']['data_frame']['height'])
 
     # create train image batcher
     train_images_batcher = ImagesBatcher(queue_size=params['train_batcher']['queue_size'],
@@ -153,7 +158,7 @@ def train():
     net_type = params['net']['type']
     if net_type == 'ResNet':
         net = CNNNet(softmax_size, depth=params['net']['depth'], data_size=params['preproc']['data_frame'],
-                                    pretrain_weight='resnet-34-kinetics.pth')
+                     pretrain_weight='resnet-34-kinetics.pth')
     else:
         print('Type net is not supported!')
         exit(0)
@@ -172,21 +177,28 @@ def train():
 
     opt_type = params['opt']['type']
     if opt_type == 'SGD':
-        optimizer = optim.SGD([{'params': net.parameters()}, {'params': loss.parameters()}], lr=lr, momentum=momentum, weight_decay=weight_decay, nesterov=True)#, caffe_like=True)
+        optimizer = optim.SGD([{'params': net.parameters()}, {'params': loss.parameters()}], lr=lr, momentum=momentum,
+                              weight_decay=weight_decay, nesterov=True)  # , caffe_like=True)
     if opt_type == 'ASGD':
-        optimizer = optim.ASGD([{'params': net.parameters()}, {'params': loss.parameters()}], lr=lr, weight_decay=weight_decay)#, caffe_like=True)
+        optimizer = optim.ASGD([{'params': net.parameters()}, {'params': loss.parameters()}], lr=lr,
+                               weight_decay=weight_decay)  # , caffe_like=True)
     if opt_type == 'Adagrad':
-        optimizer = optim.Adagrad([{'params': net.parameters()}, {'params': loss.parameters()}], lr=lr, weight_decay=weight_decay)
+        optimizer = optim.Adagrad([{'params': net.parameters()}, {'params': loss.parameters()}], lr=lr,
+                                  weight_decay=weight_decay)
     if opt_type == 'Adadelta':
-        optimizer = optim.Adadelta([{'params': net.parameters()}, {'params': loss.parameters()}], lr=lr, weight_decay=weight_decay)
+        optimizer = optim.Adadelta([{'params': net.parameters()}, {'params': loss.parameters()}], lr=lr,
+                                   weight_decay=weight_decay)
     if opt_type == 'Adam':
-        optimizer = optim.Adam([{'params': net.parameters()}, {'params': loss.parameters()}], lr=lr, weight_decay=weight_decay)
+        optimizer = optim.Adam([{'params': net.parameters()}, {'params': loss.parameters()}], lr=lr,
+                               weight_decay=weight_decay)
     if opt_type == 'RMSprop':
-        optimizer = optim.RMSprop([{'params': net.parameters()}, {'params': loss.parameters()}], lr=lr, weight_decay=weight_decay, momentum=momentum)
+        optimizer = optim.RMSprop([{'params': net.parameters()}, {'params': loss.parameters()}], lr=lr,
+                                  weight_decay=weight_decay, momentum=momentum)
     if opt_type == 'LBFGS':
-        optimizer = optim.LBFGS(net.parameters(), lr=lr, max_iter=5, max_eval=None, tolerance_grad=1e-05, tolerance_change=1e-09, history_size=1, line_search_fn=None)
+        optimizer = optim.LBFGS(net.parameters(), lr=lr, max_iter=5, max_eval=None, tolerance_grad=1e-05,
+                                tolerance_change=1e-09, history_size=1, line_search_fn=None)
 
-    #if params['net']['init'] == 'fine_tune':
+    # if params['net']['init'] == 'fine_tune':
     #    optimizer = cp['optimizer']
 
     lr_scheduler_type = params['lr_scheduler']['type']
@@ -194,38 +206,38 @@ def train():
     if lr_scheduler_type == 'ReduceLROnPlateau':
         scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, factor=gamma)
     if lr_scheduler_type == 'MultiStepLR':
-        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[15000,30000,60000], gamma=gamma)
+        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, milestones=[15000, 30000, 60000], gamma=gamma)
     if lr_scheduler_type == 'ExponentialLR':
         scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=gamma)
     if lr_scheduler_type == 'SGDR':
         scheduler = SGDR_scheduler(optimizer,
                                    lr_start=lr,
-                                   lr_end=gamma*lr,
-                                   lr_period=params['train']['epoch_size']//params['train']['step_size'],
+                                   lr_end=gamma * lr,
+                                   lr_period=params['train']['epoch_size'] // params['train']['step_size'],
                                    scale_lr=params['lr_scheduler']['scale_lr'],
                                    scale_lr_fc=params['lr_scheduler']['scale_lr_fc'])
     if lr_scheduler_type == 'LRFinder':
         scheduler = LRFinder_scheduler(optimizer,
-                                   lr_start=lr,
-                                   lr_end=gamma*lr,
-                                   lr_period=params['train']['epoch_size']//params['train']['step_size'],
-                                   use_linear_decay=params['lr_scheduler']['use_linear_decay'],
-                                   scale_lr=params['lr_scheduler']['scale_lr'],
-                                   scale_lr_fc=params['lr_scheduler']['scale_lr_fc'])
+                                       lr_start=lr,
+                                       lr_end=gamma * lr,
+                                       lr_period=params['train']['epoch_size'] // params['train']['step_size'],
+                                       use_linear_decay=params['lr_scheduler']['use_linear_decay'],
+                                       scale_lr=params['lr_scheduler']['scale_lr'],
+                                       scale_lr_fc=params['lr_scheduler']['scale_lr_fc'])
     if lr_scheduler_type == 'OneCyclePolicy':
         scheduler = OneCyclePolicy_scheduler(optimizer,
-                                   lr_max=lr,
-                                   lr_period=params['train']['epoch_size']//params['train']['step_size'],
-                                   use_linear_decay=params['lr_scheduler']['use_linear_decay'],
-                                   scale_lr=params['lr_scheduler']['scale_lr'],
-                                   scale_lr_fc=params['lr_scheduler']['scale_lr_fc'])
+                                             lr_max=lr,
+                                             lr_period=params['train']['epoch_size'] // params['train']['step_size'],
+                                             use_linear_decay=params['lr_scheduler']['use_linear_decay'],
+                                             scale_lr=params['lr_scheduler']['scale_lr'],
+                                             scale_lr_fc=params['lr_scheduler']['scale_lr_fc'])
     if lr_scheduler_type == 'MultiCyclePolicy':
         scheduler = MultiCyclePolicy_scheduler(optimizer,
-                                   lr_max=lr,
-                                   lr_period=params['train']['epoch_size']//params['train']['step_size'],
-                                   use_linear_decay=params['lr_scheduler']['use_linear_decay'],
-                                   scale_lr=params['lr_scheduler']['scale_lr'],
-                                   scale_lr_fc=params['lr_scheduler']['scale_lr_fc'])
+                                               lr_max=lr,
+                                               lr_period=params['train']['epoch_size'] // params['train']['step_size'],
+                                               use_linear_decay=params['lr_scheduler']['use_linear_decay'],
+                                               scale_lr=params['lr_scheduler']['scale_lr'],
+                                               scale_lr_fc=params['lr_scheduler']['scale_lr_fc'])
 
     net_trainer = NetTrainer(logs_dir=log['tb_log_dir'],
                              cuda_id=params['train']['cuda_device'],
@@ -259,7 +271,8 @@ def train():
     train_images_batcher.finish()
     valid_images_batcher.finish()
 
-def test():
+
+def tes76t():
     arguments_parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     arguments_parser.add_argument('--config', help='yml config path', type=str, required=True)
     arguments_parser.add_argument('--host', help='name of the host server', type=str, required=True)
@@ -280,7 +293,7 @@ def test():
 
     test_dataset_parser = AVDBParser(dataset_root=dataset['data_root'],
                                      file_list=dataset['test_file_list'],
-                                     ungroup=train_params['preproc']['data_frame']['depth']==1)
+                                     ungroup=train_params['preproc']['data_frame']['depth'] == 1)
 
     test_data_sampler = GroupRandomSampler(data=test_dataset_parser.get_data(),
                                            num_sample_per_classes=train_params['preproc']['data_frame']['depth'],
@@ -299,8 +312,10 @@ def test():
                                                use_mirroring=False,
                                                use_random_crop=False,
                                                use_center_crop=train_params['preproc']['aug']['pad'] > 0 \
-                                                               or train_params['preproc']['crop_size'] != train_params['preproc']['data_frame']['width'] \
-                                                               or train_params['preproc']['crop_size'] != train_params['preproc']['data_frame']['height'])
+                                                               or train_params['preproc']['crop_size'] !=
+                                                               train_params['preproc']['data_frame']['width'] \
+                                                               or train_params['preproc']['crop_size'] !=
+                                                               train_params['preproc']['data_frame']['height'])
 
     test_images_batcher = ImagesBatcher(queue_size=train_params['valid_batcher']['queue_size'],
                                         batch_size=train_params['valid_batcher']['batch'],
@@ -308,7 +323,8 @@ def test():
                                         image_processor=test_image_processor,
                                         single_epoch=True,
                                         cache_data=False,
-                                        disk_reader_process_num=train_params['valid_batcher']['disk_reader_process_num'])
+                                        disk_reader_process_num=train_params['valid_batcher'][
+                                            'disk_reader_process_num'])
 
     batch_processor = BatchProcessor4D(depth=train_params['preproc']['data_frame']['depth'],
                                        use_pin_memory=train_params['batch_proc']['use_pin_memory'],
@@ -334,6 +350,7 @@ def test():
     accuracy_fn.by_frames(predict)
     accuracy_fn.by_clips(predict)
 
+
 if __name__ == "__main__":
     train()
-    #test()
+    # test()

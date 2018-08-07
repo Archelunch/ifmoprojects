@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
+import sys
+import os
+
+sys.path.append('../../')
+sys.path.append('/media/stc_ml_school/team1')
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from pytorch.common.losses import *
 from collections import OrderedDict
 
-from resnet import resnet34, get_vec
+from pytorch.VEmotionNet.models.resnet import resnet34, get_vec
 
 class FeatureExtractor(nn.Module):
     def __init__(self, submodule, extracted_layers):
@@ -29,7 +34,7 @@ class CNNNet(nn.Module):
         # sample_size = data_size['width']
         # sample_duration = data_size['depth']
         self.pretrained = resnet34(num_classes=8631)
-        self.pretrained.load_state_dict(torch.load("model_13.pt"))
+        self.pretrained.load_state_dict(torch.load("/media/stc_ml_school/team1/pytorch/VEmotionNet/models/model_13.pt"))
         num_ftrs = self.pretrained.fc.in_features
         self.pretrained.fc = nn.Linear(num_ftrs, 2)
 
@@ -40,6 +45,6 @@ class CNNNet(nn.Module):
         # self.net = FeatureExtractor(net, emb_name)
 
     def forward(self, data):
-        output = self.pretrained(data)
+        output = self.pretrained(data[:,:,0,:,:])
         return output
 
