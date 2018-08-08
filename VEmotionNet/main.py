@@ -3,6 +3,7 @@ import sys
 
 sys.path.append('../../')
 sys.path.append('/media/stc_ml_school/team1')
+
 from pytorch.common.datasets_parsers.av_parser import AVDBParser
 from pytorch.common.net_trainer import NetTrainer
 from pytorch.common.losses import *
@@ -17,7 +18,7 @@ from pytorch.common.batcher.batch_processor import BatchProcessor4D
 
 import torch.optim as optim
 
-from models.pretrained_net import CNNNet
+from models.pretrained_net import CNNNet, GRUNet
 from accuracy import Accuracy, Accuracy3D
 
 import logging
@@ -112,6 +113,7 @@ def train():
                                                 mean=params['preproc']['mean'],
                                                 scale=params['preproc']['scale'],
                                                 crop_size=params['preproc']['crop_size'],
+                                                extend_size=params['preproc']['extend_size'],
                                                 pad=params['preproc']['aug']['pad'],
                                                 use_cutout=params['preproc']['aug']['use_cutout'],
                                                 use_mirroring=params['preproc']['aug']['use_mirroring'],
@@ -123,6 +125,7 @@ def train():
                                                 mean=params['preproc']['mean'],
                                                 scale=params['preproc']['scale'],
                                                 crop_size=params['preproc']['crop_size'],
+                                                extend_size=params['preproc']['extend_size'],
                                                 pad=params['preproc']['aug']['pad'],
                                                 use_cutout=False,
                                                 use_mirroring=False,
@@ -159,6 +162,8 @@ def train():
     if net_type == 'ResNet':
         net = CNNNet(softmax_size, depth=params['net']['depth'], data_size=params['preproc']['data_frame'],
                      pretrain_weight='resnet-34-kinetics.pth')
+    elif net_type == 'GRUNet':
+        net = GRUNet(depth=params['net']['depth'], data_size=params['preproc']['data_frame'])
     else:
         print('Type net is not supported!')
         exit(0)
