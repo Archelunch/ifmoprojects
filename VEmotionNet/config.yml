@@ -17,21 +17,21 @@ dataset:
 seed: 1234
 
 net:
-  type: GRUNet #ResNet
-  depth: 6
-  imsize: (256,256)
+  type: ResNet
+  depth: 5
+  imsize: (96,112)
   softmax_size: 2
   fine_tune: no
 
 
 parser:
-  max_num_clips: 10
+  max_num_clips: 0
   max_num_samples: 0
 
 preproc:
   data_frame:
-    width: 256
-    height: 256
+    width: 96
+    height: 112
     depth: 5
   is_color: True
   mean: 127.5
@@ -52,12 +52,12 @@ sampler:
   step_size_for_samples: 6
 
 train_batcher:
-  batch: 256 #batch size
+  batch: 512 #batch size
   queue_size: 5
   disk_reader_process_num: 1
 
 valid_batcher:
-  batch: 256 #batch size
+  batch: 512 #batch size
   queue_size: 5
   disk_reader_process_num: 1
 
@@ -67,7 +67,7 @@ batch_proc:
 
 opt:
   type: Adam
-  lr: 0.006 #initial learning rate
+  lr: 0.01 #initial learning rate
   momentum: 0.2
   weight_decay: 5.e-4 #initial weight decay
 
@@ -86,7 +86,7 @@ train:
   max_iter: 10000000 #maximum iteration for training
   validate_iter: 1000
   snapshot_iter: 10000 #snapshot model frequency
-  experiment_name: 'EmoV0_step0' #name for current experiment
+  experiment_name: 'EmoV1_step0' #name for current experiment
 
 losses:
    MSE:
