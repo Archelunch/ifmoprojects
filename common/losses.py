@@ -20,9 +20,9 @@ def calc_l(x, y):
     var_x = get_var(x, mean_x)
     var_y = get_var(y, mean_y)
 
-    cov = torch.mean((x - mean_x) * (y - mean_y)) / (x.size()[0] - 1)
+    cov = torch.mean((x - mean_x) * (y - mean_y))
 
-    return 1 - 2*cov / (var_x ** 2 + var_y ** 2 + (mean_x - mean_y) ** 2)
+    return 1 - 2*cov / (var_x + var_y + (mean_x - mean_y) ** 2)
 
 
 class TotalLoss(nn.Module):
